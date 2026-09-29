@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>제조 및 생산 계획 통합 시스템 V11</title>
+    <title>제조 및 생산 계획 통합 시스템</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Vue.js 3 -->
@@ -29,11 +29,11 @@
         <!-- 글로벌 헤더 -->
         <header class="bg-white shadow-sm z-10 px-6 py-4 flex justify-between items-center shrink-0">
             <div>
-                <h1 class="text-2xl font-black text-slate-800 tracking-tight">제조 & 생산 통합 계획 시스템 V11</h1>
-                <p class="text-xs text-slate-500 font-medium mt-1">Multi-Project Management Dashboard (Independent Projects)</p>
+                <h1 class="text-2xl font-black text-slate-800 tracking-tight">제조 & 생산 통합 계획 시스템 V12</h1>
+                <p class="text-xs text-slate-500 font-medium mt-1">Local Storage Save & Yearly Filtering Supported</p>
             </div>
 
-            <!-- 메인 탭 -->
+            <!-- 메인 탭 (4개로 분리) -->
             <div class="flex space-x-2 bg-slate-100 p-1 rounded-lg border border-slate-200">
                 <button @click="currentTab = 'equipment'" 
                         :class="['px-5 py-2 rounded-md font-bold text-sm transition-all shadow-sm', currentTab === 'equipment' ? 'bg-white text-blue-700 ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700 shadow-none']">
@@ -43,9 +43,13 @@
                         :class="['px-5 py-2 rounded-md font-bold text-sm transition-all shadow-sm', currentTab === 'production' ? 'bg-white text-blue-700 ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700 shadow-none']">
                     제품 생산 계획
                 </button>
-                <button @click="currentTab = 'summary'" 
-                        :class="['px-5 py-2 rounded-md font-bold text-sm transition-all shadow-sm', currentTab === 'summary' ? 'bg-indigo-600 text-white ring-1 ring-indigo-700' : 'text-slate-500 hover:text-slate-700 shadow-none']">
-                    전체 프로젝트 요약
+                <button @click="currentTab = 'summary_eq'" 
+                        :class="['px-5 py-2 rounded-md font-bold text-sm transition-all shadow-sm', currentTab === 'summary_eq' ? 'bg-blue-600 text-white ring-1 ring-blue-700' : 'text-slate-500 hover:text-slate-700 shadow-none']">
+                    장비 프로젝트 요약
+                </button>
+                <button @click="currentTab = 'summary_prod'" 
+                        :class="['px-5 py-2 rounded-md font-bold text-sm transition-all shadow-sm', currentTab === 'summary_prod' ? 'bg-emerald-600 text-white ring-1 ring-emerald-700' : 'text-slate-500 hover:text-slate-700 shadow-none']">
+                    생산 프로젝트 요약
                 </button>
             </div>
         </header>
@@ -279,7 +283,7 @@
                         <div class="px-4 py-2 border-b border-slate-200 flex justify-between items-center bg-slate-50 shrink-0">
                             <h3 class="text-sm font-bold text-slate-800">상세 스케줄</h3>
                             <span class="text-xs text-slate-500 font-medium bg-yellow-100 px-2 py-1 rounded border border-yellow-200">
-                                💡 처음엔 모두 비어 있으며, 아무 일자에 기입하면 해당 일자부터 월말까지 자동 적용됩니다.
+                                💡 자동 기입은 주말/공휴일을 건너뜁니다. 필요시 수동 기입하세요.
                             </span>
                         </div>
                         
@@ -290,7 +294,6 @@
                                         <th class="border-r border-slate-300 px-2 py-2 w-16 bg-slate-200 text-slate-700">분류</th>
                                         <th class="border-r border-slate-300 px-3 py-2 w-40 bg-slate-200 text-slate-700">항목</th>
                                         <th class="border-r border-slate-400 px-3 py-2 w-28 bg-indigo-100 text-indigo-900 font-black shadow-[2px_0_5px_rgba(0,0,0,0.05)]">월 누계</th>
-                                        <!-- 일자 헤더에만 빨간색 적용 -->
                                         <th v-for="dInfo in productionDays" :key="'th-'+dInfo.day" 
                                             :class="['border-r border-slate-300 px-2 py-2 min-w-[90px] w-[90px] font-black', dInfo.isRed ? 'text-red-500 bg-red-50' : 'text-slate-700 bg-slate-100']">
                                             {{ dInfo.day }}일
@@ -302,7 +305,6 @@
                                         <td rowspan="4" class="border-r border-b border-slate-300 font-black text-emerald-700 bg-emerald-100/50 tracking-widest" style="writing-mode: vertical-lr; transform: rotate(180deg);">INPUT</td>
                                         <td class="border-r border-b border-slate-300 text-left px-3 py-2 font-semibold text-slate-600">Operation ratio (%)</td>
                                         <td class="border-r border-b border-slate-400 bg-indigo-50 font-bold text-indigo-700">{{ activeProcessTotals.avgOpRatio }}%</td>
-                                        <!-- 데이터 셀에는 빨간색 적용 제외 -->
                                         <td v-for="(dayData, idx) in activeProcess.schedule.slice(0, productionDays.length)" :key="'in-op-'+idx" class="border-r border-b border-slate-300 p-1">
                                             <input type="number" v-model="dayData.operationRatio" @input="handleRatioAutoFill(idx, 'operationRatio')" class="w-full text-center bg-yellow-50 border border-yellow-200 py-1 rounded text-xs font-bold text-slate-700 focus:outline-none focus:border-yellow-400">
                                         </td>
@@ -371,7 +373,6 @@
                                         </td>
                                     </tr>
 
-                                    <!-- EOH (마이너스 시 빨간색 알람) -->
                                     <tr>
                                         <td colspan="2" class="border-r border-b border-slate-400 bg-slate-700 text-white font-bold text-center py-4">EOH (월말 최종 재고량)</td>
                                         <td :class="['border-r border-b border-slate-500 font-black py-4 text-[16px] shadow-inner text-center', activeProcessTotals.finalEoh !== '' && activeProcessTotals.finalEoh < 0 ? 'bg-red-600 text-red-100' : 'bg-slate-800 text-white']">
@@ -388,122 +389,129 @@
                 </div>
             </div>
 
-            <!-- ==================== 3. 전체 프로젝트 종합 요약 탭 ==================== -->
-            <div v-show="currentTab === 'summary'" class="flex flex-col h-full bg-slate-50 overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-200 bg-white shrink-0 shadow-sm">
-                    <h2 class="text-xl font-black text-slate-800">전체 프로젝트 종합 현황판</h2>
-                    <p class="text-xs font-bold text-slate-500 mt-1">장비 제조 프로젝트와 제품 생산 프로젝트의 현황을 한눈에 확인하세요.</p>
+            <!-- ==================== 3. 장비 프로젝트 요약 탭 ==================== -->
+            <div v-show="currentTab === 'summary_eq'" class="flex flex-col h-full bg-slate-50 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200 bg-white shrink-0 shadow-sm flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-black text-slate-800">장비 제조 프로젝트 요약</h2>
+                        <p class="text-xs font-bold text-slate-500 mt-1">연도별 필터링을 통해 장비 프로젝트를 관리하세요.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-slate-600 text-sm">연도 필터:</span>
+                        <select v-model="summaryYear" class="border border-slate-300 rounded-lg px-3 py-1.5 font-bold text-sm bg-white shadow-sm focus:outline-none focus:border-blue-400">
+                            <option v-for="y in availableYears" :key="y" :value="y">{{ y }}년</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <div class="overflow-y-auto custom-scrollbar flex-1 p-6 flex flex-col gap-6 xl:flex-row">
-                    
-                    <!-- 장비 제조 요약 리스트 -->
-                    <div class="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 p-5 flex flex-col">
-                        <h3 class="text-lg font-black text-blue-800 mb-4 flex items-center border-b border-slate-100 pb-3">
-                            <span class="text-xl mr-2">🛠️</span> 장비 제조 프로젝트 현황 (총 {{ eqProjects.length }}개)
-                        </h3>
-                        <div v-if="eqProjects.length === 0" class="text-sm text-slate-400 text-center mt-10">등록된 장비 제조 프로젝트가 없습니다.</div>
-                        
-                        <div class="flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-2">
-                            <div v-for="proj in eqSummary" :key="proj.id" class="bg-blue-50/40 rounded-xl border border-blue-100 p-5 hover:shadow-md transition">
-                                <div class="flex justify-between items-center mb-3">
-                                    <span class="font-black text-slate-800 text-lg">{{ proj.name }}</span>
-                                    <button @click="currentTab='equipment'; activeEqProjectId=proj.id;" class="text-xs font-bold bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200">상세 보기 &rarr;</button>
+                <div class="overflow-y-auto custom-scrollbar flex-1 p-6">
+                    <div v-if="filteredEqSummary.length === 0" class="text-center text-slate-500 mt-20 font-bold">해당 연도에 등록된 장비 제조 프로젝트가 없습니다.</div>
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                        <div v-for="proj in filteredEqSummary" :key="proj.id" class="bg-white rounded-2xl shadow-lg border border-slate-200 p-5 flex flex-col hover:shadow-xl transition">
+                            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+                                <span class="font-black text-slate-800 text-lg flex items-center"><span class="mr-2">🛠️</span> {{ proj.name }}</span>
+                                <button @click="currentTab='equipment'; activeEqProjectId=proj.id;" class="text-xs font-bold bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-200">상세 보기 &rarr;</button>
+                            </div>
+                            
+                            <div class="flex space-x-6 text-sm mb-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                <div class="flex-1">
+                                    <p class="font-bold text-slate-500 text-xs mb-1">시작일</p>
+                                    <p class="font-bold text-slate-800">{{ proj.startDate }}</p>
                                 </div>
-                                
-                                <div class="flex space-x-6 text-sm mb-4 border-b border-blue-100 pb-3">
-                                    <div class="flex-1">
-                                        <p class="font-bold text-slate-500">시작일</p>
-                                        <p class="font-bold text-slate-800">{{ proj.startDate }}</p>
-                                    </div>
-                                    <div class="flex-1">
-                                        <p class="font-bold text-slate-500">계획 총 소요일</p>
-                                        <p class="font-black text-blue-700">{{ proj.planDays }} 일</p>
-                                    </div>
-                                    <div class="flex-1 border-l border-blue-200 pl-4">
-                                        <p class="font-bold text-slate-500">실제 총 소요일</p>
-                                        <p class="font-black text-emerald-600">{{ proj.actualDays }} 일</p>
-                                    </div>
+                                <div class="flex-1">
+                                    <p class="font-bold text-slate-500 text-xs mb-1">계획 총 소요일</p>
+                                    <p class="font-black text-blue-600">{{ proj.planDays }} 일</p>
                                 </div>
+                                <div class="flex-1 border-l border-slate-200 pl-4">
+                                    <p class="font-bold text-slate-500 text-xs mb-1">실제 총 소요일</p>
+                                    <p class="font-black text-emerald-600">{{ proj.actualDays }} 일</p>
+                                </div>
+                            </div>
 
-                                <!-- 공정 리스트 상세 표기 -->
-                                <p class="text-[11px] font-bold text-slate-500 mb-2">세부 공정 현황 (오늘 날짜 기준)</p>
-                                <div class="flex flex-col gap-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
-                                    <div v-for="(task, tIdx) in proj.tasksDetail" :key="tIdx" class="flex items-center justify-between bg-white p-2.5 rounded border border-slate-200 shadow-sm">
-                                        <div class="flex items-center space-x-2 w-1/3">
-                                            <span :class="['text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[45px] text-center', task.badgeClass]">{{ task.status }}</span>
-                                            <span class="text-xs font-bold text-slate-700 truncate" :title="task.name">{{ task.name }}</span>
-                                        </div>
-                                        <div class="w-1/2 text-left">
-                                            <span class="text-[11px] text-slate-500 truncate block" :title="task.progress">{{ task.progress }}</span>
-                                        </div>
-                                        <div class="w-1/6 text-right">
-                                            <span class="text-[11px] font-bold text-slate-600">소요: {{ task.days }}</span>
-                                        </div>
+                            <p class="text-[11px] font-bold text-slate-500 mb-2 px-1">세부 공정 현황 (오늘 날짜 기준)</p>
+                            <div class="flex flex-col gap-2 max-h-56 overflow-y-auto custom-scrollbar pr-1">
+                                <div v-for="(task, tIdx) in proj.tasksDetail" :key="tIdx" class="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200 shadow-sm hover:bg-slate-50 transition">
+                                    <div class="flex items-center space-x-3 w-[35%]">
+                                        <span :class="['text-[10px] font-bold px-2 py-1 rounded min-w-[50px] text-center', task.badgeClass]">{{ task.status }}</span>
+                                        <span class="text-xs font-bold text-slate-700 truncate" :title="task.name">{{ task.name }}</span>
+                                    </div>
+                                    <div class="w-[50%] text-left">
+                                        <span class="text-xs text-slate-500 truncate block" :title="task.progress">{{ task.progress }}</span>
+                                    </div>
+                                    <div class="w-[15%] text-right">
+                                        <span class="text-[11px] font-bold text-slate-600">소요: {{ task.days }}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- 제품 생산 요약 리스트 -->
-                    <div class="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 p-5 flex flex-col">
-                        <h3 class="text-lg font-black text-emerald-800 mb-4 flex items-center border-b border-slate-100 pb-3">
-                            <span class="text-xl mr-2">📦</span> 제품 생산 프로젝트 현황 (총 {{ prodProjects.length }}개)
-                        </h3>
-                        <div v-if="prodProjects.length === 0" class="text-sm text-slate-400 text-center mt-10">등록된 제품 생산 프로젝트가 없습니다.</div>
-                        
-                        <div class="flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-2">
-                            <div v-for="proj in prodSummary" :key="proj.id" class="bg-emerald-50/40 rounded-xl border border-emerald-100 p-5 hover:shadow-md transition">
-                                <div class="flex justify-between items-center mb-4 border-b border-emerald-100 pb-2">
-                                    <span class="font-black text-slate-800 text-lg">{{ proj.name }}</span>
-                                    <button @click="currentTab='production'; activeProdProjectId=proj.id;" class="text-xs font-bold bg-emerald-100 text-emerald-700 px-3 py-1 rounded hover:bg-emerald-200">상세 보기 &rarr;</button>
-                                </div>
-                                
-                                <!-- 공정별 생산수량 & OEE 차트 (높이 증가) -->
-                                <div v-if="proj.chartData.labels.length > 0" class="mb-5">
-                                    <p class="text-[11px] font-bold text-slate-500 mb-1">공정별 월간 총 생산 수량 및 OEE(%)</p>
-                                    <div class="bg-white p-2 rounded-xl border border-emerald-100 h-64 shadow-sm">
-                                        <canvas :id="'summary-chart-' + proj.id"></canvas>
-                                    </div>
-                                </div>
+            <!-- ==================== 4. 생산 프로젝트 요약 탭 ==================== -->
+            <div v-show="currentTab === 'summary_prod'" class="flex flex-col h-full bg-slate-50 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200 bg-white shrink-0 shadow-sm flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-black text-slate-800">제품 생산 프로젝트 요약</h2>
+                        <p class="text-xs font-bold text-slate-500 mt-1">연도별 필터링을 통해 생산 프로젝트를 관리하세요.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-slate-600 text-sm">연도 필터:</span>
+                        <select v-model="summaryYear" @change="renderSummaryCharts" class="border border-slate-300 rounded-lg px-3 py-1.5 font-bold text-sm bg-white shadow-sm focus:outline-none focus:border-emerald-400">
+                            <option v-for="y in availableYears" :key="y" :value="y">{{ y }}년</option>
+                        </select>
+                    </div>
+                </div>
 
-                                <!-- 모든 공정의 생산량/재고량 표시 -->
-                                <div v-if="proj.procDetails.length > 0">
-                                    <p class="text-[11px] font-bold text-slate-500 mb-2">각 공정별 누적 현황</p>
-                                    <div class="flex flex-col gap-3">
-                                        <div v-for="proc in proj.procDetails" :key="proc.id" class="bg-white p-3.5 rounded-xl border border-emerald-100 shadow-sm flex flex-col gap-2">
-                                            <div class="flex justify-between items-center border-b border-slate-100 pb-1">
-                                                <span class="font-black text-sm text-emerald-800 flex items-center">
-                                                    {{ proc.name }}
-                                                    <span v-if="proc.isFinal" class="ml-2 text-[9px] font-bold bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded border border-rose-200">최종 출하 공정</span>
-                                                </span>
-                                                <span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded border border-slate-200">{{ proc.latestDateLabel }}</span>
+                <div class="overflow-y-auto custom-scrollbar flex-1 p-6">
+                    <div v-if="filteredProdSummary.length === 0" class="text-center text-slate-500 mt-20 font-bold">해당 연도에 등록된 제품 생산 프로젝트가 없습니다.</div>
+                    <div class="grid grid-cols-1 gap-6">
+                        <div v-for="proj in filteredProdSummary" :key="proj.id" class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 flex flex-col hover:shadow-xl transition">
+                            <div class="flex justify-between items-center mb-5 border-b border-slate-100 pb-3">
+                                <span class="font-black text-slate-800 text-xl flex items-center"><span class="mr-2">📦</span> {{ proj.name }}</span>
+                                <button @click="currentTab='production'; activeProdProjectId=proj.id;" class="text-xs font-bold bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg hover:bg-emerald-200">상세 보기 &rarr;</button>
+                            </div>
+                            
+                            <div v-if="proj.chartData.labels.length > 0" class="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                <p class="text-xs font-bold text-slate-500 mb-2">공정별 월간 총 생산 수량 및 OEE(%)</p>
+                                <div class="bg-white p-3 rounded-xl border border-slate-200 h-64 shadow-sm">
+                                    <canvas :id="'summary-chart-' + proj.id"></canvas>
+                                </div>
+                            </div>
+
+                            <div v-if="proj.procDetails.length > 0">
+                                <p class="text-xs font-bold text-slate-500 mb-3 px-1">각 공정별 월 누적 현황</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                                    <div v-for="proc in proj.procDetails" :key="proc.id" class="bg-white p-4 rounded-xl border border-emerald-100 shadow-sm flex flex-col gap-3">
+                                        <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                                            <span class="font-black text-sm text-emerald-800 flex items-center">
+                                                {{ proc.name }}
+                                                <span v-if="proc.isFinal" class="ml-2 text-[10px] font-bold bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full border border-rose-200">최종 출하</span>
+                                            </span>
+                                            <span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded border border-slate-200">{{ proc.latestDateLabel }}</span>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2 mt-1">
+                                            <div class="text-center bg-slate-50 py-2 rounded">
+                                                <p class="text-[10px] font-bold text-slate-500 mb-1">총 생산</p>
+                                                <p class="text-sm font-black text-blue-600">{{ proc.monthlyOutput.toLocaleString() }}</p>
                                             </div>
-                                            <div class="grid grid-cols-3 gap-2 mt-1">
-                                                <div class="text-center">
-                                                    <p class="text-[10px] font-bold text-slate-400 mb-0.5">총 생산</p>
-                                                    <p class="text-sm font-black text-blue-600">{{ proc.monthlyOutput.toLocaleString() }}</p>
-                                                </div>
-                                                <div class="text-center" v-if="proc.isFinal">
-                                                    <p class="text-[10px] font-bold text-slate-400 mb-0.5">총 출하</p>
-                                                    <p class="text-sm font-black text-rose-600">{{ proc.monthlyShipment.toLocaleString() }}</p>
-                                                </div>
-                                                <div class="text-center">
-                                                    <p class="text-[10px] font-bold text-slate-400 mb-0.5">최종 재고</p>
-                                                    <p :class="['text-sm font-black', proc.finalEoh < 0 ? 'text-red-600' : 'text-emerald-600']">{{ proc.finalEoh.toLocaleString() }}</p>
-                                                </div>
+                                            <div class="text-center bg-rose-50 py-2 rounded" v-if="proc.isFinal">
+                                                <p class="text-[10px] font-bold text-rose-500 mb-1">총 출하</p>
+                                                <p class="text-sm font-black text-rose-600">{{ proc.monthlyShipment.toLocaleString() }}</p>
+                                            </div>
+                                            <div :class="['text-center py-2 rounded', proc.finalEoh < 0 ? 'bg-red-100' : 'bg-emerald-50']">
+                                                <p :class="['text-[10px] font-bold mb-1', proc.finalEoh < 0 ? 'text-red-500' : 'text-emerald-600']">최종 재고</p>
+                                                <p :class="['text-sm font-black', proc.finalEoh < 0 ? 'text-red-600' : 'text-emerald-700']">{{ proc.finalEoh.toLocaleString() }}</p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div v-else class="text-xs font-bold text-slate-500 bg-white p-3 rounded-lg border border-emerald-100 text-center">
-                                    등록된 생산 공정이 없습니다.
-                                </div>
+                            </div>
+                            <div v-else class="text-sm font-bold text-slate-500 bg-slate-50 p-6 rounded-xl border border-slate-200 text-center">
+                                등록된 생산 공정이 없습니다.
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
 
@@ -558,10 +566,7 @@
             const defaultProc = {
                 id: 1, name: '조립 공정',
                 setup: { facilities: 4, workHourPerDay: 20, cycleTimeSec: 2.5, qtyPerCycle: 1 },
-                // 초기에는 완전히 비워둠
-                schedule: Array.from({length: 31}, () => ({ 
-                    operationRatio: '', yieldRatio: '', outOperationRatio: '', outYieldRatio: '', shipment: '' 
-                }))
+                schedule: Array.from({length: 31}, () => ({ operationRatio: '', yieldRatio: '', outOperationRatio: '', outYieldRatio: '', shipment: '' }))
             };
             return { id, name, month: currentMonthStr, activeProcessId: 1, finalProcessId: 1, processes: [defaultProc] };
         }
@@ -569,19 +574,78 @@
         createApp({
             data() {
                 return {
-                    currentTab: 'equipment',
-                    eqProjects: [createEqProject(1, '신규 라인 장비 제조 프로젝트')],
+                    currentTab: 'equipment', // equipment, production, summary_eq, summary_prod
+                    eqProjects: [],
                     activeEqProjectId: 1,
-                    prodProjects: [createProdProject(1, '26년도 하반기 제품 생산 프로젝트')],
+                    prodProjects: [],
                     activeProdProjectId: 1,
                     categoryOptions: ['기구설계', '전장설계', '자재구매', '가공품구매', '기구조립', '배선조립', '검사/테스트', '포장/출하', '기타'],
-                    chartInstances: {} 
+                    chartInstances: {},
+                    summaryYear: new Date().getFullYear().toString(),
+                    availableYears: []
                 };
+            },
+            created() {
+                // Local Storage 연동
+                const storedEq = localStorage.getItem('mes_eq_projects_v12');
+                if (storedEq) {
+                    this.eqProjects = JSON.parse(storedEq);
+                    if(this.eqProjects.length > 0) this.activeEqProjectId = this.eqProjects[0].id;
+                } else {
+                    this.eqProjects = [createEqProject(1, '신규 라인 장비 제조 프로젝트')];
+                }
+
+                const storedProd = localStorage.getItem('mes_prod_projects_v12');
+                if (storedProd) {
+                    this.prodProjects = JSON.parse(storedProd);
+                    if(this.prodProjects.length > 0) this.activeProdProjectId = this.prodProjects[0].id;
+                } else {
+                    this.prodProjects = [createProdProject(1, '26년도 하반기 제품 생산 프로젝트')];
+                }
+
+                this.updateAvailableYears();
+            },
+            mounted() {
+                if(!localStorage.getItem('mes_eq_projects_v12')) {
+                    this.autoFillPlanDates();
+                }
+            },
+            watch: {
+                eqProjects: {
+                    deep: true,
+                    handler(newVal) {
+                        localStorage.setItem('mes_eq_projects_v12', JSON.stringify(newVal));
+                        this.updateAvailableYears();
+                    }
+                },
+                prodProjects: {
+                    deep: true,
+                    handler(newVal) {
+                        localStorage.setItem('mes_prod_projects_v12', JSON.stringify(newVal));
+                        this.updateAvailableYears();
+                        if (this.currentTab === 'summary_prod') {
+                            nextTick(() => this.renderSummaryCharts());
+                        }
+                    }
+                },
+                currentTab(newVal) {
+                    if (newVal === 'summary_prod') {
+                        nextTick(() => this.renderSummaryCharts());
+                    }
+                }
             },
             computed: {
                 activeEqProject() { return this.eqProjects.find(p => p.id === this.activeEqProjectId) || null; },
                 activeProdProject() { return this.prodProjects.find(p => p.id === this.activeProdProjectId) || null; },
                 
+                // ===== 연도 필터링 =====
+                filteredEqSummary() {
+                    return this.eqSummary.filter(p => p.startDate.startsWith(this.summaryYear));
+                },
+                filteredProdSummary() {
+                    return this.prodSummary.filter(p => p.month.startsWith(this.summaryYear));
+                },
+
                 // ===== 장비 =====
                 ganttDates() {
                     if(!this.activeEqProject || !this.activeEqProject.startDate) return [];
@@ -641,7 +705,7 @@
                     const daysCount = this.productionDays.length;
                     const isFinal = (p.id === this.activeProdProject.finalProcessId);
                     
-                    let hasDataYet = false; // 데이터가 하나라도 들어왔는지 체크
+                    let hasDataYet = false; 
                     
                     return p.schedule.slice(0, daysCount).map(day => {
                         const inRaw = day.operationRatio;
@@ -678,17 +742,22 @@
                     
                     let sumIn = 0, sumMax = 0, sumOut = 0, sumShip = 0;
                     let sumOp = 0, sumYd = 0, sumOutOp = 0, sumOutYd = 0;
-                    const count = schedule.length;
+                    let validCount = 0;
                     let finalEoh = '';
                     
                     schedule.forEach(d => {
-                        sumIn += d.inputPlan || 0; sumMax += d.maxCapacity || 0; sumOut += d.outputPlan || 0; sumShip += Number(d.shipment) || 0;
-                        sumOp += Number(d.operationRatio) || 0; sumYd += Number(d.yieldRatio) || 0; sumOutOp += Number(d.outOperationRatio) || 0; sumOutYd += Number(d.outYieldRatio) || 0;
-                        if(d.eoh !== '') finalEoh = d.eoh;
+                        if (d.inputPlan !== '') {
+                            sumIn += d.inputPlan || 0; sumMax += d.maxCapacity || 0; sumOut += d.outputPlan || 0; sumShip += Number(d.shipment) || 0;
+                            sumOp += Number(d.operationRatio) || 0; sumYd += Number(d.yieldRatio) || 0; sumOutOp += Number(d.outOperationRatio) || 0; sumOutYd += Number(d.outYieldRatio) || 0;
+                            validCount++;
+                            finalEoh = d.eoh;
+                        }
                     });
                     
+                    if (validCount === 0) return { avgOpRatio: 0, avgYield: 0, avgOutOpRatio: 0, avgOutYield: 0, totalInput: 0, totalMaxCapa: 0, totalOutput: 0, totalShipment: 0, finalEoh: '' };
+
                     return {
-                        avgOpRatio: Math.round(sumOp / count), avgYield: Math.round(sumYd / count), avgOutOpRatio: Math.round(sumOutOp / count), avgOutYield: Math.round(sumOutYd / count),
+                        avgOpRatio: Math.round(sumOp / validCount), avgYield: Math.round(sumYd / validCount), avgOutOpRatio: Math.round(sumOutOp / validCount), avgOutYield: Math.round(sumOutYd / validCount),
                         totalInput: sumIn, totalMaxCapa: sumMax, totalOutput: sumOut, totalShipment: sumShip, finalEoh: finalEoh
                     };
                 },
@@ -712,10 +781,8 @@
                         let tasksDetail = [];
                         
                         proj.tasks.forEach(t => {
-                            // plan
                             if (t.plan.start) { const d = new Date(t.plan.start); if(!minPlan || d < minPlan) minPlan = d; }
                             if (t.plan.end) { const d = new Date(t.plan.end); if(!maxPlan || d > maxPlan) maxPlan = d; }
-                            // actual
                             if (t.actual.start) { const d = new Date(t.actual.start); if(!minAct || d < minAct) minAct = d; }
                             if (t.actual.end) { const d = new Date(t.actual.end); if(!maxAct || d > maxAct) maxAct = d; }
                             
@@ -764,25 +831,30 @@
                             const maxCapaDaily = Math.floor(uph * proc.setup.workHourPerDay);
                             const isFinal = (proc.id === proj.finalProcessId);
 
-                            let sumOut = 0, sumShip = 0, eoh = 0, sumMaxCapa = 0;
+                            let sumOut = 0, sumShip = 0, eoh = '', sumMaxCapa = 0;
                             let latestDay = 0;
+                            let hasData = false;
 
                             proc.schedule.slice(0, daysInMonth).forEach((day, idx) => {
                                 if (day.operationRatio !== '' || day.outOperationRatio !== '' || day.shipment !== '') {
                                     latestDay = idx + 1;
+                                    hasData = true;
                                 }
-                                const inOp = Number(day.operationRatio) || 0;
-                                const outOp = Number(day.outOperationRatio) || 0;
-                                const outYd = Number(day.outYieldRatio) || 0;
-                                const ship = isFinal ? (Number(day.shipment) || 0) : 0;
+                                if(hasData) {
+                                    const inOp = Number(day.operationRatio) || 0;
+                                    const outOp = Number(day.outOperationRatio) || 0;
+                                    const outYd = Number(day.outYieldRatio) || 0;
+                                    const ship = isFinal ? (Number(day.shipment) || 0) : 0;
 
-                                const actIn = Math.min(Math.floor(maxCapaDaily * (inOp / 100)), maxCapaDaily * (outOp / 100));
-                                const outPlan = Math.floor(actIn * (outYd / 100));
+                                    const actIn = Math.min(Math.floor(maxCapaDaily * (inOp / 100)), maxCapaDaily * (outOp / 100));
+                                    const outPlan = Math.floor(actIn * (outYd / 100));
 
-                                sumMaxCapa += maxCapaDaily;
-                                sumOut += outPlan; 
-                                sumShip += ship; 
-                                eoh += outPlan - ship;
+                                    sumMaxCapa += maxCapaDaily;
+                                    sumOut += outPlan; 
+                                    sumShip += ship; 
+                                    if(eoh === '') eoh = 0;
+                                    eoh += outPlan - ship;
+                                }
                             });
                             
                             const oee = sumMaxCapa > 0 ? ((sumOut / sumMaxCapa) * 100).toFixed(1) : 0;
@@ -797,37 +869,21 @@
                             });
                         });
 
-                        return { id: proj.id, name: proj.name, chartData, procDetails };
+                        return { id: proj.id, name: proj.name, month: proj.month, chartData, procDetails };
                     });
                 }
             },
-            watch: {
-                currentTab(newVal) {
-                    if (newVal === 'summary') {
-                        nextTick(() => this.renderSummaryCharts());
+            methods: {
+                updateAvailableYears() {
+                    const years = new Set();
+                    this.eqProjects.forEach(p => years.add(p.startDate.split('-')[0]));
+                    this.prodProjects.forEach(p => years.add(p.month.split('-')[0]));
+                    years.add(new Date().getFullYear().toString());
+                    this.availableYears = Array.from(years).sort().reverse();
+                    if(!this.availableYears.includes(this.summaryYear)) {
+                        this.summaryYear = this.availableYears[0];
                     }
                 },
-                prodProjects: {
-                    deep: true,
-                    handler() {
-                        if (this.currentTab === 'summary') {
-                            nextTick(() => this.renderSummaryCharts());
-                        }
-                    }
-                }
-            },
-            mounted() {
-                this.autoFillPlanDates();
-                setTimeout(() => {
-                    if(this.activeEqProject && this.activeEqProject.tasks[0].plan.start) {
-                        const d1 = new Date(this.activeEqProject.tasks[0].plan.start);
-                        const d2 = new Date(d1); d2.setDate(d1.getDate() + 4);
-                        this.activeEqProject.tasks[0].actual.start = d1.toISOString().split('T')[0];
-                        this.activeEqProject.tasks[0].actual.end = d2.toISOString().split('T')[0];
-                    }
-                }, 500);
-            },
-            methods: {
                 // ===== 장비 =====
                 addEqProject() {
                     const name = prompt("장비 제조 프로젝트명:");
@@ -921,16 +977,20 @@
                     const newName = prompt("변경할 공정 이름을 입력하세요:", this.activeProcess.name);
                     if (newName && newName.trim() !== "") this.activeProcess.name = newName.trim();
                 },
+                // 주말/공휴일 건너뛰기 로직
                 handleRatioAutoFill(changedIdx, field) {
                     const val = this.activeProcess.schedule[changedIdx][field];
                     for(let i = changedIdx + 1; i < this.productionDays.length; i++) {
+                        if (this.productionDays[i].isRed) {
+                            continue; // 휴일 건너뛰기
+                        }
                         this.activeProcess.schedule[i][field] = val === '' ? '' : Number(val);
                     }
                 },
                 
                 // Chart.js 렌더링
                 renderSummaryCharts() {
-                    this.prodSummary.forEach(proj => {
+                    this.filteredProdSummary.forEach(proj => {
                         const canvasId = 'summary-chart-' + proj.id;
                         const ctx = document.getElementById(canvasId);
                         if(!ctx) return;
