@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>제조 및 생산 계획 통합 시스템 V15 (Final)</title>
+    <title>제조 및 생산 계획 통합 시스템 V16</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Vue.js 3 -->
@@ -27,8 +27,8 @@
         <!-- 글로벌 헤더 -->
         <header class="bg-white shadow-sm z-10 px-6 py-4 flex justify-between items-center shrink-0">
             <div>
-                <h1 class="text-2xl font-black text-slate-800 tracking-tight">제조 & 생산 통합 계획 시스템 V15</h1>
-                <p class="text-xs text-slate-500 font-medium mt-1">Gantt Holiday Exclusion & Separated Monthly Charts</p>
+                <h1 class="text-2xl font-black text-slate-800 tracking-tight">제조 & 생산 통합 계획 시스템 V16</h1>
+                <p class="text-xs text-slate-500 font-medium mt-1">Average Calculation Fixed & Advanced OEE Charts</p>
             </div>
 
             <div class="flex space-x-2 bg-slate-100 p-1 rounded-lg border border-slate-200">
@@ -373,6 +373,7 @@
 
             <!-- ==================== 3. 장비 프로젝트 요약 탭 ==================== -->
             <div v-show="currentTab === 'summary_eq'" class="flex flex-col h-full bg-slate-50 overflow-hidden">
+                <!-- 이전과 동일 -->
                 <div class="px-6 py-4 border-b border-slate-200 bg-white shrink-0 shadow-sm flex justify-between items-center">
                     <div>
                         <h2 class="text-xl font-black text-slate-800">장비 제조 프로젝트 요약</h2>
@@ -447,6 +448,7 @@
 
                 <div class="overflow-y-auto custom-scrollbar flex-1 p-6">
                     <div v-if="filteredProdSummary.length === 0" class="text-center text-slate-500 mt-20 font-bold">해당 연도에 등록된 제품 생산 프로젝트가 없습니다.</div>
+                    
                     <div class="grid grid-cols-1 gap-6">
                         <div v-for="proj in filteredProdSummary" :key="proj.id" class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 flex flex-col hover:shadow-xl transition">
                             <div class="flex justify-between items-center mb-5 border-b border-slate-100 pb-3">
@@ -454,17 +456,39 @@
                                 <button @click="currentTab='production'; activeProdProjectId=proj.id;" class="text-xs font-bold bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg hover:bg-emerald-200">상세 보기 &rarr;</button>
                             </div>
                             
-                            <div v-if="proj.chartDataLabels.length > 0" class="mb-6 grid grid-cols-1 xl:grid-cols-2 gap-4">
+                            <!-- 차트 영역: 월간 생산수량, 개별 OEE, 최신일 기준 YTD OEE -->
+                            <div v-if="proj.chartDataLabels.length > 0" class="mb-6 flex flex-col gap-6">
+                                <!-- 1. 공정별 월간 생산 수량 -->
                                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                                     <p class="text-xs font-bold text-slate-500 mb-2">공정별 월간 생산 수량 (Monthly Output)</p>
                                     <div class="bg-white p-3 rounded-xl border border-slate-200 h-64 shadow-sm">
                                         <canvas :id="'summary-chart-output-' + proj.id"></canvas>
                                     </div>
                                 </div>
+                                
+                                <!-- 2. 공정별 월간 설비 종합 효율 (각각 개별 차트) -->
                                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                    <p class="text-xs font-bold text-slate-500 mb-2">공정별 월간 설비종합효율 (Monthly OEE %)</p>
+                                    <p class="text-xs font-bold text-slate-500 mb-3">개별 공정 월간 설비종합효율 (Monthly OEE %)</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                                        <div v-for="oee in proj.oeeCharts" :key="'oee-'+oee.procId" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+                                            <p class="text-[11px] font-bold text-slate-700 mb-2 text-center">{{ oee.procName }}</p>
+                                            <div class="h-48 w-full relative">
+                                                <canvas :id="'summary-chart-oee-' + proj.id + '-' + oee.procId"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 3. 최신일 기준 누적 OEE 길게 표시 -->
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <p class="text-xs font-bold text-slate-500">최신일 기준 공정별 OEE (Year-to-Date OEE %)</p>
+                                        <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-bold border border-indigo-200">
+                                            누적 생산 / 누적 최대 CAPA
+                                        </span>
+                                    </div>
                                     <div class="bg-white p-3 rounded-xl border border-slate-200 h-64 shadow-sm">
-                                        <canvas :id="'summary-chart-oee-' + proj.id"></canvas>
+                                        <canvas :id="'summary-chart-latest-oee-' + proj.id"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -580,12 +604,12 @@
                 };
             },
             created() {
-                const storedEq = localStorage.getItem('mes_eq_projects_v15');
+                const storedEq = localStorage.getItem('mes_eq_projects_v16');
                 if (storedEq) {
                     this.eqProjects = JSON.parse(storedEq);
                     if(this.eqProjects.length > 0) this.activeEqProjectId = this.eqProjects[0].id;
                 } else {
-                    const oldEq = localStorage.getItem('mes_eq_projects_v14');
+                    const oldEq = localStorage.getItem('mes_eq_projects_v15');
                     if(oldEq) {
                         this.eqProjects = JSON.parse(oldEq);
                         if(this.eqProjects.length > 0) this.activeEqProjectId = this.eqProjects[0].id;
@@ -594,12 +618,12 @@
                     }
                 }
 
-                const storedProd = localStorage.getItem('mes_prod_projects_v15');
+                const storedProd = localStorage.getItem('mes_prod_projects_v16');
                 if (storedProd) {
                     this.prodProjects = JSON.parse(storedProd);
                     if(this.prodProjects.length > 0) this.activeProdProjectId = this.prodProjects[0].id;
                 } else {
-                    const oldProd = localStorage.getItem('mes_prod_projects_v14');
+                    const oldProd = localStorage.getItem('mes_prod_projects_v15');
                     if (oldProd) {
                         this.prodProjects = JSON.parse(oldProd);
                         if(this.prodProjects.length > 0) this.activeProdProjectId = this.prodProjects[0].id;
@@ -610,7 +634,7 @@
                 this.updateAvailableYears();
             },
             mounted() {
-                if(!localStorage.getItem('mes_eq_projects_v15')) {
+                if(!localStorage.getItem('mes_eq_projects_v16')) {
                     this.autoFillPlanDates();
                 }
             },
@@ -618,14 +642,14 @@
                 eqProjects: {
                     deep: true,
                     handler(newVal) {
-                        localStorage.setItem('mes_eq_projects_v15', JSON.stringify(newVal));
+                        localStorage.setItem('mes_eq_projects_v16', JSON.stringify(newVal));
                         this.updateAvailableYears();
                     }
                 },
                 prodProjects: {
                     deep: true,
                     handler(newVal) {
-                        localStorage.setItem('mes_prod_projects_v15', JSON.stringify(newVal));
+                        localStorage.setItem('mes_prod_projects_v16', JSON.stringify(newVal));
                         this.updateAvailableYears();
                         if (this.currentTab === 'summary_prod') {
                             nextTick(() => this.renderSummaryCharts());
@@ -780,7 +804,7 @@
                     
                     let sumIn = 0, sumMax = 0, sumOut = 0, sumShip = 0;
                     let sumOp = 0, sumYd = 0, sumOutOp = 0, sumOutYd = 0;
-                    let validCount = 0;
+                    let countInOp = 0, countInYd = 0, countOutOp = 0, countOutYd = 0;
                     let finalEoh = '';
                     const isFinal = this.activeProcess && this.activeProcess.id === this.activeProdProject.finalProcessId;
                     
@@ -788,17 +812,21 @@
                         if (d.inputPlan !== '') {
                             sumIn += d.inputPlan || 0; sumMax += d.maxCapacity || 0; sumOut += d.outputPlan || 0; 
                             sumShip += isFinal ? (Number(this.currentSchedule[idx].shipment) || 0) : 0;
-                            sumOp += Number(d.operationRatio) || 0; sumYd += Number(d.yieldRatio) || 0; sumOutOp += Number(d.outOperationRatio) || 0; sumOutYd += Number(d.outYieldRatio) || 0;
-                            validCount++;
                             finalEoh = d.eoh;
                         }
+                        // 수정: 실제 입력값이 있을 때만 평균 계산에 포함되도록 valid 카운트 증가
+                        if (this.currentSchedule[idx].operationRatio !== '') { sumOp += Number(this.currentSchedule[idx].operationRatio); countInOp++; }
+                        if (this.currentSchedule[idx].yieldRatio !== '') { sumYd += Number(this.currentSchedule[idx].yieldRatio); countInYd++; }
+                        if (this.currentSchedule[idx].outOperationRatio !== '') { sumOutOp += Number(this.currentSchedule[idx].outOperationRatio); countOutOp++; }
+                        if (this.currentSchedule[idx].outYieldRatio !== '') { sumOutYd += Number(this.currentSchedule[idx].outYieldRatio); countOutYd++; }
                     });
                     
-                    if (validCount === 0) return { avgOpRatio: 0, avgYield: 0, avgOutOpRatio: 0, avgOutYield: 0, totalInput: 0, totalMaxCapa: 0, totalOutput: 0, totalShipment: 0, finalEoh: finalEoh !== '' ? finalEoh : '' };
-
                     return {
-                        avgOpRatio: Math.round(sumOp / validCount), avgYield: Math.round(sumYd / validCount), avgOutOpRatio: Math.round(sumOutOp / validCount), avgOutYield: Math.round(sumOutYd / validCount),
-                        totalInput: sumIn, totalMaxCapa: sumMax, totalOutput: sumOut, totalShipment: sumShip, finalEoh: finalEoh
+                        avgOpRatio: countInOp ? Math.round(sumOp / countInOp) : 0, 
+                        avgYield: countInYd ? Math.round(sumYd / countInYd) : 0, 
+                        avgOutOpRatio: countOutOp ? Math.round(sumOutOp / countOutOp) : 0, 
+                        avgOutYield: countOutYd ? Math.round(sumOutYd / countOutYd) : 0,
+                        totalInput: sumIn, totalMaxCapa: sumMax, totalOutput: sumOut, totalShipment: sumShip, finalEoh: finalEoh !== '' ? finalEoh : ''
                     };
                 },
 
@@ -850,7 +878,16 @@
 
                     return this.prodProjects.map(proj => {
                         let chartDataOutput = { labels: months, datasets: [] };
-                        let chartDataOee = { labels: months, datasets: [] };
+                        let oeeCharts = []; // 공정별 차트 분리용 배열
+                        let latestOeeChart = { 
+                            labels: [], 
+                            datasets: [{ 
+                                label: '최신일 누적 기준 OEE (%)', 
+                                data: [], 
+                                backgroundColor: [], 
+                                borderRadius: 4
+                            }] 
+                        };
                         let procDetails = [];
                         let hasDataForYear = false;
 
@@ -861,6 +898,7 @@
                             let procOutput = new Array(12).fill(0);
                             let procMaxCapa = new Array(12).fill(0);
                             let yearlyShipment = 0;
+                            let yearlyMaxCapaForOee = 0; // 누적 OEE를 위한 전체 CAPA 
                             
                             let eoh = '';
                             let latestDateLabel = '입력 데이터 없음';
@@ -896,6 +934,7 @@
                                             hasDataForYear = true;
                                             procOutput[monthIndex] += outPlan;
                                             procMaxCapa[monthIndex] += maxCapaDaily;
+                                            yearlyMaxCapaForOee += maxCapaDaily;
                                             yearlyShipment += ship;
                                             latestDateLabel = `${mm}월 ${idx + 1}일 기준`;
                                             eoh = runningEoh; 
@@ -907,21 +946,39 @@
                             if (eoh === '') eoh = runningEoh; 
                             
                             let procOee = procOutput.map((out, i) => procMaxCapa[i] > 0 ? Number(((out / procMaxCapa[i]) * 100).toFixed(1)) : 0);
+                            let ytdOee = yearlyMaxCapaForOee > 0 ? Number(((procOutput.reduce((a,b)=>a+b, 0) / yearlyMaxCapaForOee) * 100).toFixed(1)) : 0;
                             
+                            const color = this.chartColors[pIdx % this.chartColors.length];
+
+                            // 1. 월별 생산 수량 누적 차트셋
                             chartDataOutput.datasets.push({
                                 label: proc.name,
                                 data: procOutput,
-                                backgroundColor: this.chartColors[pIdx % this.chartColors.length]
+                                backgroundColor: color
                             });
 
-                            chartDataOee.datasets.push({
-                                label: proc.name,
-                                data: procOee,
-                                borderColor: this.chartColors[pIdx % this.chartColors.length],
-                                backgroundColor: 'transparent',
-                                borderWidth: 2,
-                                tension: 0.1
+                            // 2. 공정별 개별 OEE 라인 차트셋
+                            oeeCharts.push({
+                                procId: proc.id,
+                                procName: proc.name,
+                                chartData: {
+                                    labels: months,
+                                    datasets: [{
+                                        label: 'OEE (%)',
+                                        data: procOee,
+                                        borderColor: color,
+                                        backgroundColor: color + '33', // 투명도 추가
+                                        borderWidth: 2,
+                                        tension: 0.2,
+                                        fill: true
+                                    }]
+                                }
                             });
+
+                            // 3. 최신일 기준 누적 OEE 바 차트셋
+                            latestOeeChart.labels.push(proc.name);
+                            latestOeeChart.datasets[0].data.push(ytdOee);
+                            latestOeeChart.datasets[0].backgroundColor.push(color);
 
                             procDetails.push({
                                 id: proc.id, name: proc.name, isFinal: isFinal,
@@ -930,7 +987,11 @@
                             });
                         });
 
-                        return { id: proj.id, name: proj.name, hasDataForYear, chartDataLabels: months, chartDataOutput, chartDataOee, procDetails };
+                        return { 
+                            id: proj.id, name: proj.name, hasDataForYear, 
+                            chartDataLabels: months, chartDataOutput, oeeCharts, latestOeeChart, 
+                            procDetails 
+                        };
                     });
                 }
             },
@@ -1040,57 +1101,69 @@
                     if (newName && newName.trim() !== "") this.activeProcess.name = newName.trim();
                 },
                 handleRatioAutoFill(changedIdx, field) {
-                    if (field === 'shipment') return; // 출하량은 자동 기입 안함
+                    if (field === 'shipment') return;
                     
                     const sched = this.currentSchedule;
                     const val = sched[changedIdx][field];
                     for(let i = changedIdx + 1; i < this.productionDays.length; i++) {
-                        if (this.productionDays[i].isRed) {
-                            continue; // 휴일 건너뛰기
-                        }
+                        if (this.productionDays[i].isRed) continue;
                         sched[i][field] = val === '' ? '' : Number(val);
                     }
                 },
                 
-                // Chart.js 렌더링 (월간 그래프 분리)
+                // Chart.js 렌더링
                 renderSummaryCharts() {
                     this.filteredProdSummary.forEach(proj => {
+                        // 1. 월간 생산수량 차트
                         const canvasOutputId = 'summary-chart-output-' + proj.id;
-                        const canvasOeeId = 'summary-chart-oee-' + proj.id;
-                        
                         const ctxOutput = document.getElementById(canvasOutputId);
-                        const ctxOee = document.getElementById(canvasOeeId);
                         
-                        if(!ctxOutput || !ctxOee) return;
+                        if (ctxOutput) {
+                            if(this.chartInstances[canvasOutputId]) this.chartInstances[canvasOutputId].destroy();
+                            this.chartInstances[canvasOutputId] = new Chart(ctxOutput, {
+                                type: 'bar',
+                                data: proj.chartDataOutput,
+                                options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true } } }
+                            });
+                        }
 
-                        if(this.chartInstances[canvasOutputId]) this.chartInstances[canvasOutputId].destroy();
-                        if(this.chartInstances[canvasOeeId]) this.chartInstances[canvasOeeId].destroy();
+                        // 2. 개별 공정 월간 OEE 차트 생성
+                        proj.oeeCharts.forEach(oee => {
+                            const canvasOeeId = 'summary-chart-oee-' + proj.id + '-' + oee.procId;
+                            const ctxOee = document.getElementById(canvasOeeId);
 
-                        this.chartInstances[canvasOutputId] = new Chart(ctxOutput, {
-                            type: 'bar',
-                            data: {
-                                labels: proj.chartDataLabels,
-                                datasets: proj.chartDataOutput.datasets
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: { x: { grid: { display: false } }, y: { beginAtZero: true } }
+                            if (ctxOee) {
+                                if(this.chartInstances[canvasOeeId]) this.chartInstances[canvasOeeId].destroy();
+                                this.chartInstances[canvasOeeId] = new Chart(ctxOee, {
+                                    type: 'line',
+                                    data: oee.chartData,
+                                    options: { 
+                                        responsive: true, 
+                                        maintainAspectRatio: false,
+                                        plugins: { legend: { display: false } }, // 공간 절약을 위해 범례 제거
+                                        scales: { x: { grid: { display: false } }, y: { beginAtZero: true, max: 100 } } 
+                                    }
+                                });
                             }
                         });
 
-                        this.chartInstances[canvasOeeId] = new Chart(ctxOee, {
-                            type: 'line',
-                            data: {
-                                labels: proj.chartDataLabels,
-                                datasets: proj.chartDataOee.datasets
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: { x: { grid: { display: false } }, y: { beginAtZero: true, max: 100 } }
-                            }
-                        });
+                        // 3. 최신일 기준 누적 OEE 차트
+                        const canvasLatestOeeId = 'summary-chart-latest-oee-' + proj.id;
+                        const ctxLatestOee = document.getElementById(canvasLatestOeeId);
+                        
+                        if (ctxLatestOee) {
+                            if(this.chartInstances[canvasLatestOeeId]) this.chartInstances[canvasLatestOeeId].destroy();
+                            this.chartInstances[canvasLatestOeeId] = new Chart(ctxLatestOee, {
+                                type: 'bar',
+                                data: proj.latestOeeChart,
+                                options: { 
+                                    responsive: true, 
+                                    maintainAspectRatio: false,
+                                    plugins: { legend: { display: false } },
+                                    scales: { x: { grid: { display: false } }, y: { beginAtZero: true, max: 100 } } 
+                                }
+                            });
+                        }
                     });
                 }
             }
