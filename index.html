@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>제조 및 생산 계획 통합 시스템 V14 (Final)</title>
+    <title>제조 및 생산 계획 통합 시스템 V15 (Final)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Vue.js 3 -->
@@ -27,28 +27,15 @@
         <!-- 글로벌 헤더 -->
         <header class="bg-white shadow-sm z-10 px-6 py-4 flex justify-between items-center shrink-0">
             <div>
-                <h1 class="text-2xl font-black text-slate-800 tracking-tight">제조 & 생산 통합 계획 시스템 V14</h1>
-                <p class="text-xs text-slate-500 font-medium mt-1">Gantt Holiday Exclusion & Monthly Charts Edition</p>
+                <h1 class="text-2xl font-black text-slate-800 tracking-tight">제조 & 생산 통합 계획 시스템 V15</h1>
+                <p class="text-xs text-slate-500 font-medium mt-1">Gantt Holiday Exclusion & Separated Monthly Charts</p>
             </div>
 
-            <!-- 메인 탭 -->
             <div class="flex space-x-2 bg-slate-100 p-1 rounded-lg border border-slate-200">
-                <button @click="currentTab = 'equipment'" 
-                        :class="['px-5 py-2 rounded-md font-bold text-sm transition-all shadow-sm', currentTab === 'equipment' ? 'bg-white text-blue-700 ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700 shadow-none']">
-                    장비 제조 계획
-                </button>
-                <button @click="currentTab = 'production'" 
-                        :class="['px-5 py-2 rounded-md font-bold text-sm transition-all shadow-sm', currentTab === 'production' ? 'bg-white text-blue-700 ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700 shadow-none']">
-                    제품 생산 계획
-                </button>
-                <button @click="currentTab = 'summary_eq'" 
-                        :class="['px-5 py-2 rounded-md font-bold text-sm transition-all shadow-sm', currentTab === 'summary_eq' ? 'bg-blue-600 text-white ring-1 ring-blue-700' : 'text-slate-500 hover:text-slate-700 shadow-none']">
-                    장비 프로젝트 요약
-                </button>
-                <button @click="currentTab = 'summary_prod'" 
-                        :class="['px-5 py-2 rounded-md font-bold text-sm transition-all shadow-sm', currentTab === 'summary_prod' ? 'bg-emerald-600 text-white ring-1 ring-emerald-700' : 'text-slate-500 hover:text-slate-700 shadow-none']">
-                    생산 프로젝트 요약
-                </button>
+                <button @click="currentTab = 'equipment'" :class="['px-5 py-2 rounded-md font-bold text-sm transition-all shadow-sm', currentTab === 'equipment' ? 'bg-white text-blue-700 ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700 shadow-none']">장비 제조 계획</button>
+                <button @click="currentTab = 'production'" :class="['px-5 py-2 rounded-md font-bold text-sm transition-all shadow-sm', currentTab === 'production' ? 'bg-white text-blue-700 ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700 shadow-none']">제품 생산 계획</button>
+                <button @click="currentTab = 'summary_eq'" :class="['px-5 py-2 rounded-md font-bold text-sm transition-all shadow-sm', currentTab === 'summary_eq' ? 'bg-blue-600 text-white ring-1 ring-blue-700' : 'text-slate-500 hover:text-slate-700 shadow-none']">장비 프로젝트 요약</button>
+                <button @click="currentTab = 'summary_prod'" :class="['px-5 py-2 rounded-md font-bold text-sm transition-all shadow-sm', currentTab === 'summary_prod' ? 'bg-emerald-600 text-white ring-1 ring-emerald-700' : 'text-slate-500 hover:text-slate-700 shadow-none']">생산 프로젝트 요약</button>
             </div>
         </header>
 
@@ -113,9 +100,7 @@
                         </div>
                         <div class="overflow-y-auto custom-scrollbar flex-1">
                             <div v-for="(task, index) in activeEqProject.tasks" :key="index" class="border-b border-slate-200 hover:bg-blue-50/30 transition flex h-20">
-                                <div class="w-[18%] border-r border-slate-200 font-bold text-slate-700 flex items-center justify-center bg-slate-50 px-2 text-xs text-center">
-                                    {{ task.name }}
-                                </div>
+                                <div class="w-[18%] border-r border-slate-200 font-bold text-slate-700 flex items-center justify-center bg-slate-50 px-2 text-xs text-center">{{ task.name }}</div>
                                 <div class="w-[12%] border-r border-slate-200 h-full bg-slate-50 p-2 flex items-center">
                                     <select v-model="task.category" class="w-full text-[11px] font-medium border border-slate-200 rounded focus:outline-none bg-white py-1">
                                         <option value="">선택</option>
@@ -149,7 +134,6 @@
                         </div>
                     </div>
 
-                    <!-- 간트차트 셀 단위 렌더링으로 휴일 제외 -->
                     <div class="overflow-x-auto overflow-y-auto custom-scrollbar flex-1 relative bg-white">
                         <div class="gantt-grid h-10 items-center shrink-0 sticky top-0 z-50 shadow-sm bg-slate-200" :style="{ gridTemplateColumns: `repeat(${activeEqProject.targetDuration}, 45px)` }">
                             <div v-for="(day, idx) in ganttDates" :key="idx" 
@@ -158,14 +142,12 @@
                             </div>
                         </div>
                         <div v-for="(task, index) in activeEqProject.tasks" :key="'gantt-'+index" class="border-b border-slate-200 h-20">
-                            <!-- 계획 바 -->
                             <div class="gantt-grid h-10 relative" :style="{ gridTemplateColumns: `repeat(${activeEqProject.targetDuration}, 45px)` }">
                                 <div v-for="day in ganttDates" :key="'p-bg-'+day.dateStr" :class="['gantt-cell border-b border-slate-100 relative', day.isRed ? 'bg-red-50/30' : 'bg-white']">
                                     <div v-if="isTaskActive(task.plan.start, task.plan.end, day.dateStr) && !day.isRed"
                                          class="absolute top-[6px] left-0 w-[calc(100%+1px)] h-[18px] bg-blue-500 z-10 opacity-90 rounded-sm"></div>
                                 </div>
                             </div>
-                            <!-- 실적 바 -->
                             <div class="gantt-grid h-10 relative" :style="{ gridTemplateColumns: `repeat(${activeEqProject.targetDuration}, 45px)` }">
                                 <div v-for="day in ganttDates" :key="'a-bg-'+day.dateStr" :class="['gantt-cell border-b-0 relative', day.isRed ? 'bg-red-50/50' : 'bg-slate-50/50']">
                                     <div v-if="isTaskActive(task.actual.start, task.actual.end, day.dateStr) && !day.isRed"
@@ -204,35 +186,32 @@
                                 {{ proc.name }}
                             </button>
                         </div>
-                        <button @click="addProcess" class="px-3 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-bold rounded-md shadow-sm transition-colors flex items-center">
-                            + 공정 추가
-                        </button>
+                        <button @click="addProcess" class="px-3 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-bold rounded-md shadow-sm transition-colors flex items-center">+ 공정 추가</button>
                     </div>
                 </div>
 
                 <div v-if="activeProcess" class="flex flex-col flex-1 overflow-hidden space-y-4">
                     <div class="flex flex-col lg:flex-row gap-4 shrink-0">
-                        <!-- 설비/기준 정보 영역 -->
                         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex-1 flex flex-col justify-between relative overflow-hidden">
                             <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
                             <div class="ml-2 flex flex-col mb-2">
                                 <div class="flex items-center space-x-3">
-                                    <h2 class="text-md font-bold text-emerald-800">[{{ activeProcess.name }}] 기준 정보 (시간 설정)</h2>
+                                    <h2 class="text-md font-bold text-emerald-800">[{{ activeProcess.name }}] 설비 기본 설정</h2>
                                     <button @click="renameProcess" class="text-xs px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded font-bold">이름 변경</button>
                                     <button @click="deleteProcess(activeProcess.id)" class="text-xs px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded font-bold">삭제</button>
                                 </div>
                                 <div class="mt-3">
                                     <button v-if="activeProdProject.finalProcessId !== activeProcess.id" 
                                             @click="activeProdProject.finalProcessId = activeProcess.id" 
-                                            class="bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center shadow-sm">
+                                            class="bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
                                         👉 이 공정을 '최종 출하 공정'으로 지정하기
                                     </button>
-                                    <div v-else class="bg-rose-500 text-white border border-rose-600 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center w-max shadow-sm">
-                                        ✅ 현재 '최종 출하 공정'으로 지정됨 (하단에 출하량 입력란 활성화)
+                                    <div v-else class="bg-rose-500 text-white border border-rose-600 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm inline-block">
+                                        ✅ 현재 '최종 출하 공정'으로 지정됨
                                     </div>
                                 </div>
                             </div>
-                            <div class="ml-2 grid grid-cols-1 lg:grid-cols-3 gap-2 mb-3">
+                            <div class="ml-2 grid grid-cols-1 lg:grid-cols-2 gap-2 mb-3">
                                 <div class="bg-slate-50 p-2 rounded border border-slate-200">
                                     <label class="block text-[11px] font-bold text-slate-500 mb-1">작업 시간 (hr/day)</label>
                                     <input type="number" v-model.number="activeProcess.setup.workHourPerDay" step="0.5" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-sm font-bold text-slate-700 text-right focus:outline-none focus:border-emerald-400">
@@ -241,14 +220,13 @@
                                     <label class="block text-[11px] font-bold text-slate-500 mb-1">Cycle Time (초)</label>
                                     <input type="number" v-model.number="activeProcess.setup.cycleTimeSec" step="0.1" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-sm font-bold text-slate-700 text-right focus:outline-none focus:border-emerald-400">
                                 </div>
-                                <div class="bg-slate-50 p-2 rounded border border-slate-200">
+                                <div class="bg-slate-50 p-2 rounded border border-slate-200 col-span-1 lg:col-span-2">
                                     <label class="block text-[11px] font-bold text-slate-500 mb-1">Q'ty / Cycle (개)</label>
                                     <input type="number" v-model.number="activeProcess.setup.qtyPerCycle" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-sm font-bold text-slate-700 text-right focus:outline-none focus:border-emerald-400">
                                 </div>
                             </div>
-                            <!-- UPH는 일일 단위가 아닌 기본값(1대 기준 등)으로 표시하거나 제거 가능, 여기서는 설비 1대 기준 UPH로 표시 -->
                             <div class="ml-2 bg-emerald-50 py-2 px-4 rounded-lg border border-emerald-200 flex justify-between items-center shadow-sm">
-                                <span class="text-sm font-bold text-emerald-700">설비 1대당 생산량 (UPH)</span>
+                                <span class="text-sm font-bold text-emerald-700">설비 1대당 UPH</span>
                                 <span class="text-2xl font-black text-emerald-800">{{ calculatedUPHPerFacility.toLocaleString() }} <span class="text-xs font-bold">EA/hr</span></span>
                             </div>
                         </div>
@@ -256,20 +234,20 @@
                         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex-1 relative flex flex-col justify-center">
                             <h3 class="text-sm font-bold text-slate-700 mb-3 flex items-center">
                                 <svg class="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                                공정별 연간 생산 현황 예상 요약 (365일 환산)
+                                당월 누계 현황 요약
                             </h3>
                             <div class="grid grid-cols-3 gap-3">
                                 <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-center shadow-inner">
-                                    <p class="text-[11px] font-bold text-slate-500 mb-1">연간 최대 CAPA</p>
-                                    <p class="text-lg font-black text-slate-700">{{ yearlySummary.maxCapa.toLocaleString() }}</p>
+                                    <p class="text-[11px] font-bold text-slate-500 mb-1">당월 최대 CAPA</p>
+                                    <p class="text-lg font-black text-slate-700">{{ activeProcessTotals.totalMaxCapa.toLocaleString() }}</p>
                                 </div>
                                 <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200 text-center shadow-inner">
-                                    <p class="text-[11px] font-bold text-yellow-700 mb-1">연간 총 투입 예상</p>
-                                    <p class="text-lg font-black text-yellow-900">{{ yearlySummary.input.toLocaleString() }}</p>
+                                    <p class="text-[11px] font-bold text-yellow-700 mb-1">당월 총 투입</p>
+                                    <p class="text-lg font-black text-yellow-900">{{ activeProcessTotals.totalInput.toLocaleString() }}</p>
                                 </div>
                                 <div class="bg-blue-50 p-3 rounded-lg border border-blue-200 text-center shadow-inner">
-                                    <p class="text-[11px] font-bold text-blue-700 mb-1">연간 총 생산 예상</p>
-                                    <p class="text-lg font-black text-blue-900">{{ yearlySummary.output.toLocaleString() }}</p>
+                                    <p class="text-[11px] font-bold text-blue-700 mb-1">당월 총 생산</p>
+                                    <p class="text-lg font-black text-blue-900">{{ activeProcessTotals.totalOutput.toLocaleString() }}</p>
                                 </div>
                             </div>
                         </div>
@@ -279,7 +257,7 @@
                         <div class="px-4 py-2 border-b border-slate-200 flex justify-between items-center bg-slate-50 shrink-0">
                             <h3 class="text-sm font-bold text-slate-800">상세 스케줄 (월별 독립 저장)</h3>
                             <span class="text-xs text-slate-500 font-medium bg-yellow-100 px-2 py-1 rounded border border-yellow-200">
-                                💡 자동 기입은 주말/공휴일을 제외합니다. (출하량은 자동 복사되지 않음)
+                                💡 자동 기입은 주말/공휴일을 건너뜁니다. 출하량은 수동으로 기입하세요.
                             </span>
                         </div>
                         
@@ -289,7 +267,7 @@
                                     <tr>
                                         <th class="border-r border-slate-300 px-2 py-2 w-16 bg-slate-200 text-slate-700">분류</th>
                                         <th class="border-r border-slate-300 px-3 py-2 w-40 bg-slate-200 text-slate-700">항목</th>
-                                        <th class="border-r border-slate-400 px-3 py-2 w-28 bg-indigo-100 text-indigo-900 font-black shadow-[2px_0_5px_rgba(0,0,0,0.05)]">당월 누계</th>
+                                        <th class="border-r border-slate-400 px-3 py-2 w-28 bg-indigo-100 text-indigo-900 font-black shadow-[2px_0_5px_rgba(0,0,0,0.05)]">당월 평균/누계</th>
                                         <th v-for="dInfo in productionDays" :key="'th-'+dInfo.day" 
                                             :class="['border-r border-slate-300 px-2 py-2 min-w-[90px] w-[90px] font-black', dInfo.isRed ? 'text-red-500 bg-red-50' : 'text-slate-700 bg-slate-100']">
                                             {{ dInfo.day }}일
@@ -297,26 +275,25 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- [신규] 설비 대수 일일 입력칸 -->
                                     <tr class="bg-emerald-50/20 hover:bg-emerald-50 transition">
                                         <td rowspan="5" class="border-r border-b border-slate-300 font-black text-emerald-700 bg-emerald-100/50 tracking-widest" style="writing-mode: vertical-lr; transform: rotate(180deg);">INPUT</td>
-                                        <td class="border-r border-b border-slate-300 text-left px-3 py-2 font-semibold text-slate-600">설비 대수 (Facilities)</td>
+                                        <td class="border-r border-b border-slate-300 text-left px-3 py-2 font-semibold text-slate-600">설비 대수 (대)</td>
                                         <td class="border-r border-b border-slate-400 bg-indigo-50 font-bold text-indigo-700">-</td>
-                                        <td v-for="(dayData, idx) in currentSchedule.slice(0, productionDays.length)" :key="'in-fac-'+idx" class="border-r border-b border-slate-300 p-1">
+                                        <td v-for="(dayData, idx) in currentSchedule.slice(0, productionDays.length)" :key="'in-fac-'+idx" :class="['border-r border-b border-slate-300 p-1', productionDays[idx].isRed ? 'bg-red-50/20' : '']">
                                             <input type="number" v-model="dayData.facilities" @input="handleRatioAutoFill(idx, 'facilities')" class="w-full text-center bg-yellow-50 border border-yellow-200 py-1 rounded text-xs font-bold text-slate-700 focus:outline-none focus:border-yellow-400">
                                         </td>
                                     </tr>
                                     <tr class="bg-emerald-50/20 hover:bg-emerald-50 transition">
                                         <td class="border-r border-b border-slate-300 text-left px-3 py-2 font-semibold text-slate-600">Operation ratio (%)</td>
                                         <td class="border-r border-b border-slate-400 bg-indigo-50 font-bold text-indigo-700">{{ activeProcessTotals.avgOpRatio }}%</td>
-                                        <td v-for="(dayData, idx) in currentSchedule.slice(0, productionDays.length)" :key="'in-op-'+idx" class="border-r border-b border-slate-300 p-1">
+                                        <td v-for="(dayData, idx) in currentSchedule.slice(0, productionDays.length)" :key="'in-op-'+idx" :class="['border-r border-b border-slate-300 p-1', productionDays[idx].isRed ? 'bg-red-50/20' : '']">
                                             <input type="number" v-model="dayData.operationRatio" @input="handleRatioAutoFill(idx, 'operationRatio')" class="w-full text-center bg-yellow-50 border border-yellow-200 py-1 rounded text-xs font-bold text-slate-700 focus:outline-none focus:border-yellow-400">
                                         </td>
                                     </tr>
                                     <tr class="bg-emerald-50/20 hover:bg-emerald-50 transition">
                                         <td class="border-r border-b border-slate-300 text-left px-3 py-2 font-semibold text-slate-600">Yield ratio (%)</td>
                                         <td class="border-r border-b border-slate-400 bg-indigo-50 font-bold text-indigo-700">{{ activeProcessTotals.avgYield }}%</td>
-                                        <td v-for="(dayData, idx) in currentSchedule.slice(0, productionDays.length)" :key="'in-yd-'+idx" class="border-r border-b border-slate-300 p-1">
+                                        <td v-for="(dayData, idx) in currentSchedule.slice(0, productionDays.length)" :key="'in-yd-'+idx" :class="['border-r border-b border-slate-300 p-1', productionDays[idx].isRed ? 'bg-red-50/20' : '']">
                                             <input type="number" v-model="dayData.yieldRatio" @input="handleRatioAutoFill(idx, 'yieldRatio')" class="w-full text-center bg-yellow-50 border border-yellow-200 py-1 rounded text-xs font-bold text-slate-700 focus:outline-none focus:border-yellow-400">
                                         </td>
                                     </tr>
@@ -339,14 +316,14 @@
                                         <td rowspan="4" class="border-r border-b border-slate-300 font-black text-blue-700 bg-blue-100/50 tracking-widest" style="writing-mode: vertical-lr; transform: rotate(180deg);">OUTPUT</td>
                                         <td class="border-r border-b border-slate-300 text-left px-3 py-2 font-semibold text-slate-600">Operation ratio (%)</td>
                                         <td class="border-r border-b border-slate-400 bg-indigo-50 font-bold text-indigo-700">{{ activeProcessTotals.avgOutOpRatio }}%</td>
-                                        <td v-for="(dayData, idx) in currentSchedule.slice(0, productionDays.length)" :key="'out-op-'+idx" class="border-r border-b border-slate-300 p-1">
+                                        <td v-for="(dayData, idx) in currentSchedule.slice(0, productionDays.length)" :key="'out-op-'+idx" :class="['border-r border-b border-slate-300 p-1', productionDays[idx].isRed ? 'bg-red-50/20' : '']">
                                             <input type="number" v-model="dayData.outOperationRatio" @input="handleRatioAutoFill(idx, 'outOperationRatio')" class="w-full text-center bg-yellow-50 border border-yellow-200 py-1 rounded text-xs font-bold text-slate-700 focus:outline-none focus:border-yellow-400">
                                         </td>
                                     </tr>
                                     <tr class="bg-blue-50/20 hover:bg-blue-50 transition">
                                         <td class="border-r border-b border-slate-300 text-left px-3 py-2 font-semibold text-slate-600">Yield ratio (%)</td>
                                         <td class="border-r border-b border-slate-400 bg-indigo-50 font-bold text-indigo-700">{{ activeProcessTotals.avgOutYield }}%</td>
-                                        <td v-for="(dayData, idx) in currentSchedule.slice(0, productionDays.length)" :key="'out-yd-'+idx" class="border-r border-b border-slate-300 p-1">
+                                        <td v-for="(dayData, idx) in currentSchedule.slice(0, productionDays.length)" :key="'out-yd-'+idx" :class="['border-r border-b border-slate-300 p-1', productionDays[idx].isRed ? 'bg-red-50/20' : '']">
                                             <input type="number" v-model="dayData.outYieldRatio" @input="handleRatioAutoFill(idx, 'outYieldRatio')" class="w-full text-center bg-yellow-50 border border-yellow-200 py-1 rounded text-xs font-bold text-slate-700 focus:outline-none focus:border-yellow-400">
                                         </td>
                                     </tr>
@@ -368,16 +345,16 @@
                                     <tr class="bg-rose-50/40 hover:bg-rose-100/60 transition" v-if="activeProdProject.finalProcessId === activeProcess.id">
                                         <td class="border-r border-b border-slate-300 font-black text-rose-700 bg-rose-100/60 tracking-widest" style="writing-mode: vertical-lr; transform: rotate(180deg);">SHIP</td>
                                         <td class="border-r border-b border-slate-300 text-left px-3 py-2 font-black text-rose-800 flex items-center justify-between">
-                                            일일 출하량 (개별 입력)
+                                            일일 출하량 (수동)
                                             <span class="w-2 h-2 bg-rose-500 rounded-full animate-pulse"></span>
                                         </td>
                                         <td class="border-r border-b border-slate-400 bg-rose-200 font-black text-rose-900 shadow-inner">{{ activeProcessTotals.totalShipment.toLocaleString() }}</td>
-                                        <td v-for="(dayData, idx) in currentSchedule.slice(0, productionDays.length)" :key="'ship-'+idx" class="border-r border-b border-slate-300 p-1">
+                                        <td v-for="(dayData, idx) in currentSchedule.slice(0, productionDays.length)" :key="'ship-'+idx" :class="['border-r border-b border-slate-300 p-1', productionDays[idx].isRed ? 'bg-red-50/40' : '']">
+                                            <!-- 출하량은 자동 기입 안됨 -->
                                             <input type="number" v-model="dayData.shipment" class="w-full text-center bg-white border border-rose-300 py-1.5 rounded font-black text-rose-800 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 shadow-inner">
                                         </td>
                                     </tr>
 
-                                    <!-- EOH (이전달 재고 합산) -->
                                     <tr>
                                         <td colspan="2" class="border-r border-b border-slate-400 bg-slate-700 text-white font-bold text-center py-4">EOH (누적 최종 재고량)</td>
                                         <td :class="['border-r border-b border-slate-500 font-black py-4 text-[16px] shadow-inner text-center', activeProcessTotals.finalEoh !== '' && activeProcessTotals.finalEoh < 0 ? 'bg-red-600 text-red-100' : 'bg-slate-800 text-white']">
@@ -477,7 +454,6 @@
                                 <button @click="currentTab='production'; activeProdProjectId=proj.id;" class="text-xs font-bold bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg hover:bg-emerald-200">상세 보기 &rarr;</button>
                             </div>
                             
-                            <!-- [변경됨] 그래프 2개로 분리 (생산량 / OEE) -->
                             <div v-if="proj.chartDataLabels.length > 0" class="mb-6 grid grid-cols-1 xl:grid-cols-2 gap-4">
                                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                                     <p class="text-xs font-bold text-slate-500 mb-2">공정별 월간 생산 수량 (Monthly Output)</p>
@@ -604,12 +580,12 @@
                 };
             },
             created() {
-                const storedEq = localStorage.getItem('mes_eq_projects_v14');
+                const storedEq = localStorage.getItem('mes_eq_projects_v15');
                 if (storedEq) {
                     this.eqProjects = JSON.parse(storedEq);
                     if(this.eqProjects.length > 0) this.activeEqProjectId = this.eqProjects[0].id;
                 } else {
-                    const oldEq = localStorage.getItem('mes_eq_projects_v13');
+                    const oldEq = localStorage.getItem('mes_eq_projects_v14');
                     if(oldEq) {
                         this.eqProjects = JSON.parse(oldEq);
                         if(this.eqProjects.length > 0) this.activeEqProjectId = this.eqProjects[0].id;
@@ -618,39 +594,23 @@
                     }
                 }
 
-                const storedProd = localStorage.getItem('mes_prod_projects_v14');
+                const storedProd = localStorage.getItem('mes_prod_projects_v15');
                 if (storedProd) {
                     this.prodProjects = JSON.parse(storedProd);
                     if(this.prodProjects.length > 0) this.activeProdProjectId = this.prodProjects[0].id;
                 } else {
-                    const oldProd = localStorage.getItem('mes_prod_projects_v13');
+                    const oldProd = localStorage.getItem('mes_prod_projects_v14');
                     if (oldProd) {
-                        let parsed = JSON.parse(oldProd);
-                        parsed.forEach(proj => {
-                            proj.processes.forEach(proc => {
-                                if (proc.setup.facilities !== undefined) {
-                                    const fac = proc.setup.facilities;
-                                    delete proc.setup.facilities;
-                                    Object.keys(proc.schedules).forEach(m => {
-                                        proc.schedules[m].forEach((day, idx) => {
-                                            if(idx === 0) day.facilities = fac; 
-                                            else day.facilities = '';
-                                        });
-                                    });
-                                }
-                            });
-                        });
-                        this.prodProjects = parsed;
+                        this.prodProjects = JSON.parse(oldProd);
                         if(this.prodProjects.length > 0) this.activeProdProjectId = this.prodProjects[0].id;
                     } else {
                         this.prodProjects = [createProdProject(1, '26년도 하반기 제품 생산 프로젝트')];
                     }
                 }
-
                 this.updateAvailableYears();
             },
             mounted() {
-                if(!localStorage.getItem('mes_eq_projects_v14')) {
+                if(!localStorage.getItem('mes_eq_projects_v15')) {
                     this.autoFillPlanDates();
                 }
             },
@@ -658,14 +618,14 @@
                 eqProjects: {
                     deep: true,
                     handler(newVal) {
-                        localStorage.setItem('mes_eq_projects_v14', JSON.stringify(newVal));
+                        localStorage.setItem('mes_eq_projects_v15', JSON.stringify(newVal));
                         this.updateAvailableYears();
                     }
                 },
                 prodProjects: {
                     deep: true,
                     handler(newVal) {
-                        localStorage.setItem('mes_prod_projects_v14', JSON.stringify(newVal));
+                        localStorage.setItem('mes_prod_projects_v15', JSON.stringify(newVal));
                         this.updateAvailableYears();
                         if (this.currentTab === 'summary_prod') {
                             nextTick(() => this.renderSummaryCharts());
@@ -841,16 +801,6 @@
                         totalInput: sumIn, totalMaxCapa: sumMax, totalOutput: sumOut, totalShipment: sumShip, finalEoh: finalEoh
                     };
                 },
-                yearlySummary() {
-                    const totals = this.activeProcessTotals;
-                    const count = this.productionDays.length;
-                    if(count === 0 || totals.totalMaxCapa === 0) return { maxCapa: 0, input: 0, output: 0 };
-                    return {
-                        maxCapa: Math.floor((totals.totalMaxCapa / count) * 365),
-                        input: Math.floor((totals.totalInput / count) * 365),
-                        output: Math.floor((totals.totalOutput / count) * 365)
-                    };
-                },
 
                 // ===== 요약 탭 =====
                 eqSummary() {
@@ -919,6 +869,8 @@
                             let runningEoh = 0;
                             
                             allMonths.forEach(m => {
+                                if (m > `${this.summaryYearProd}-12`) return; 
+                                
                                 const sched = proc.schedules[m];
                                 const [yy, mm] = m.split('-');
                                 const daysInMonth = new Date(Number(yy), Number(mm), 0).getDate();
@@ -1111,11 +1063,9 @@
                         
                         if(!ctxOutput || !ctxOee) return;
 
-                        // 파괴
                         if(this.chartInstances[canvasOutputId]) this.chartInstances[canvasOutputId].destroy();
                         if(this.chartInstances[canvasOeeId]) this.chartInstances[canvasOeeId].destroy();
 
-                        // 막대 (생산량)
                         this.chartInstances[canvasOutputId] = new Chart(ctxOutput, {
                             type: 'bar',
                             data: {
@@ -1129,7 +1079,6 @@
                             }
                         });
 
-                        // 꺾은선 (OEE)
                         this.chartInstances[canvasOeeId] = new Chart(ctxOee, {
                             type: 'line',
                             data: {
